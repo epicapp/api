@@ -1,0 +1,40 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "Prototype of a new journaling app",
+  "babel": {
+    "presets": [
+      "env",
+      "react",
+      "stage-0"
+    ]
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "babel-node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshdmiller/journal-api.git"
+  },
+  "author": "Josh David Miller (https://joshdavidmiller.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joshdmiller/journal-api/issues"
+  },
+  "homepage": "https://github.com/joshdmiller/journal-api#readme",
+  "dependencies": {
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "neo4j-driver": "^1.5.3",
+    "rxjs": "^5.5.7"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.2"
+  }
+}
