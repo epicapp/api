@@ -22,6 +22,12 @@ app.use(( req, res, next ) => {
   next();
 });
 
+app.use(( req, res, next ) => {
+  console.log( `${req.method} ${req.path}` );
+
+  next();
+});
+
 app.use( '/v1', v1 );
 
 app.listen( 8080, () => console.log( 'Server is listening on port 8080...' ));
