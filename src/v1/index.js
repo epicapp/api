@@ -2,11 +2,16 @@ import { Router } from 'express';
 import { map } from 'rxjs/operator/map';
 import { toArray } from 'rxjs/operator/toArray';
 import { query } from './graph';
+import bodyParser from 'body-parser';
 import send from './responses';
 
 import { Dt } from './models/dates';
 
+import entries from './routes/entries';
+
 const api = Router();
+
+api.use( bodyParser.json() );
 
 api.get( '/users/:id', ( req, res ): void => {
   if ( req.params.id === req.user.id ) {
@@ -19,6 +24,8 @@ api.get( '/users/:id', ( req, res ): void => {
 api.get( '/', ( req, res ) => {
   res.send({ version: '1.0' });
 });
+
+api.use( '/entries', entries );
 
 api.get( '/all', ( req, res ) => {
   query([

@@ -9,7 +9,7 @@ export const query = ( text, parameters ) => {
   const session = driver.session();
 
   if ( Array.isArray( text ) ) {
-    text = text.join( "\n" );
+    text = text.filter( t => typeof t === 'string' ).join( "\n" );
   }
 
   return new Observable( observer => {

@@ -1,16 +1,18 @@
-const send = ( res, payload, key = 'data', code = 200 ) => res.status( code )
-  .send({
-    [key]: payload,
-  });
+const send = ( res, payload, key, code = 200 ) => res.status( code )
+  .send( key ? { [key]: payload } : payload );
 
-export default function ( res, key ) {
+export const SUCCESSFULLY_DELETED = {
+  message: 'Successfully deleted'
+};
+
+export default function ( res, key, code, props ) {
   let sent = false;
 
   return this.subscribe(
-    record => {
+    payload => {
       if ( ! sent ) {
         sent = true;
-        send( res, record, key );
+        send( res, payload, key, code );
       }
     },
 
@@ -19,6 +21,13 @@ export default function ( res, key ) {
       console.log( 'Error:' );
       console.log( error );
       send( res, 'An unexpected error occurred', 'error', 500 );
+    },
+
+    () => {
+      if ( ! sent ) {
+        sent = true;
+        send( res, 'Not Found', 'error', 404 );
+      }
     }
   );
 };
