@@ -21,6 +21,11 @@ const UPDATE_ENTRY_PROPS = [
   'content',
 ];
 
+const ENTRY_TYPES = [
+  'TimeEntry',
+  'Note',
+];
+
 const api = Router();
 export default api;
 
@@ -63,13 +68,19 @@ api.post( '/', ( req, res ) => {
     id: id(),
   };
 
+  const labels = [
+    ...( req.body.types || [] ).filter( l => ENTRY_TYPES.some( t => l === t ) ),
+    'Entry',
+  ].join( ':' );
+
   // TODO: add validations
 
   query([
     'MATCH (user:User {id:{userId}})',
-    'CREATE (entry:Entry {entry})-[:CREATED_BY]->(user)',
+    'CREATE (entry {entry})-[:CREATED_BY]->(user)',
     'SET entry.created_at = timestamp()',
     'SET entry.updated_at = timestamp()',
+    `SET entry:${labels}`,
     'RETURN entry',
   ], {
     userId: req.user.id,
@@ -100,6 +111,7 @@ api.patch( '/:id', ( req, res ) => {
   const props = filterProps( req.body, UPDATE_ENTRY_PROPS );
 
   // TODO: add validations
+  // TODO: allow changing entity types?
 
   query([
     'MATCH (entry:Entry {id:{id}})-[:CREATED_BY]->(user:User {id:{userId}})',
