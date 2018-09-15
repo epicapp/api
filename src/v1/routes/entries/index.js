@@ -40,11 +40,13 @@ api.get( '/', ( req, res ) => {
     ...req.query,
   };
 
+  const labels = [ filters.type, 'Entry', ].filter( l => l ).join( ':' );
+
   const count = ( filters.count !== false ) && [ '0', 'false', 'off' ].every( v => v !== filters.count );
 
   // FIXME: prevent injection attacks
   let res$ = query([
-    'MATCH (entry:Entry)-[:CREATED_BY]->(user:User {id:{userId}})',
+    `MATCH (entry:${labels})-[:CREATED_BY]->(user:User {id:{userId}})`,
     filters.project
       ? `MATCH (project:Project {id:'${filters.project}'})<-[:OF]-(entry)`
       : 'OPTIONAL MATCH (project:Project)<-[:OF]-(entry)',
