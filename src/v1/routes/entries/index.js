@@ -15,10 +15,12 @@ import Entry from '../../models/entries';
 
 const CREATE_ENTRY_PROPS = [
   'content',
+  'time_started_at',
+  'time_ended_at',
 ];
 
 const UPDATE_ENTRY_PROPS = [
-  'content',
+  ...CREATE_ENTRY_PROPS,
 ];
 
 const ENTRY_TYPES = [
@@ -40,9 +42,13 @@ api.get( '/', ( req, res ) => {
 
   const count = ( filters.count !== false ) && [ '0', 'false', 'off' ].every( v => v !== filters.count );
 
+  // FIXME: prevent injection attacks
   let res$ = query([
     'MATCH (entry:Entry)-[:CREATED_BY]->(user:User {id:{userId}})',
-    count ? 'return count( entry ) as entries' : 'RETURN entry',
+    filters.project
+      ? `MATCH (project:Project {id:'${filters.project}'})<-[:OF]-(entry)`
+      : 'OPTIONAL MATCH (project:Project)<-[:OF]-(entry)',
+    count ? 'return count( entry ) as entries' : 'RETURN entry, project.id as project',
     count || 'ORDER BY entry.created_at',
     count || `SKIP ${filters.start} LIMIT ${filters.limit}`,
   ], {
@@ -52,7 +58,7 @@ api.get( '/', ( req, res ) => {
 
   if ( ! count ) {
     res$ = res$
-      ::map( record => Entry( record.get( 'entry' ) ) )
+      ::map( r => Entry( r.get( 'entry' ), { project: r.get( 'project' ) } ) )
       ::toArray()
       ;
   } else {
@@ -73,20 +79,25 @@ api.post( '/', ( req, res ) => {
     'Entry',
   ].join( ':' );
 
+  const project = req.body.project;
+
   // TODO: add validations
 
   query([
     'MATCH (user:User {id:{userId}})',
+    project && 'MATCH (project:Project {id:{projectId}})',
     'CREATE (entry {entry})-[:CREATED_BY]->(user)',
+    project && 'CREATE (project)<-[:OF]-(entry)',
     'SET entry.created_at = timestamp()',
     'SET entry.updated_at = timestamp()',
     `SET entry:${labels}`,
     'RETURN entry',
   ], {
     userId: req.user.id,
+    projectId: project,
     entry,
   })
-  ::map( record => Entry( record.get( 'entry' ) ) )
+  ::map( record => Entry( record.get( 'entry' ), { project } ) )
   ::send( res, 'entry' )
   ;
 });
@@ -97,9 +108,10 @@ api.get( '/:id', ( req, res ) => {
 
   query([
     'MATCH (entry:Entry {id:{id}})-[:CREATED_BY]->(user:User {id:{userId}})',
-    'RETURN entry',
+    'OPTIONAL MATCH (project:Project)<-[:OF]-(entry)',
+    'RETURN entry, project.id as project',
   ], { id, userId })
-  ::map( record => Entry( record.get( 'entry' ) ) )
+  ::map( r => Entry( r.get( 'entry' ), { project: r.get( 'project' ) } ) )
   ::send( res, 'entry' )
   ;
 });
@@ -112,6 +124,7 @@ api.patch( '/:id', ( req, res ) => {
 
   // TODO: add validations
   // TODO: allow changing entity types?
+  // TODO: allow changing project
 
   query([
     'MATCH (entry:Entry {id:{id}})-[:CREATED_BY]->(user:User {id:{userId}})',

@@ -8,6 +8,7 @@ import send from './responses';
 import { Dt } from './models/dates';
 
 import entries from './routes/entries';
+import projects from './routes/projects';
 
 const api = Router();
 
@@ -26,6 +27,7 @@ api.get( '/', ( req, res ) => {
 });
 
 api.use( '/entries', entries );
+api.use( '/projects', projects );
 
 api.get( '/all', ( req, res ) => {
   query([
