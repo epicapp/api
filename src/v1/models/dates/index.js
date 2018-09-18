@@ -2,21 +2,30 @@ const ValueNodeFactory = label => ({ labels, properties }) => ({
   [label]: properties[label].toNumber(),
 });
 
-export const Day = ValueNodeFactory( 'day' );
-export const Month = ValueNodeFactory( 'month' );
-export const Year = ValueNodeFactory( 'year' );
-export const Week = ValueNodeFactory( 'week' );
+export const DayNode = ValueNodeFactory( 'day' );
+export const MonthNode = ValueNodeFactory( 'month' );
+export const WeekNode = ValueNodeFactory( 'week' );
 
-export const Dt = ( dayNode, monthNode, yearNode ) => {
-  const day = Day( dayNode );
-  const month = Month( monthNode );
-  const year = Year( yearNode );
+export const Year = ValueNodeFactory( 'year' );
+
+export const Month = ( monthNode, yearNode ) => ({
+  ...MonthNode( monthNode ),
+  ...Year( yearNode ),
+});
+
+export const Week = ( weekNode, yearNode ) => ({
+  ...WeekNode( weekNode ),
+  ...Year( yearNode ),
+});
+
+export const Day = ( dayNode, monthNode, yearNode ) => {
+  const month = Month( monthNode, yearNode );
+  const day = DayNode( dayNode );
 
   return {
-    dt: new Date( year.year, month.month - 1, day.day ),
+    date: new Date( month.year, month.month - 1, day.day ),
     ...day,
     ...month,
-    ...year,
   };
 };
 

@@ -5,7 +5,7 @@ import { query } from './graph';
 import bodyParser from 'body-parser';
 import send from './responses';
 
-import { Dt } from './models/dates';
+import { Day } from './models/dates';
 
 import entries from './routes/entries';
 import projects from './routes/projects';
@@ -36,7 +36,7 @@ api.get( '/all', ( req, res ) => {
     'RETURN year, month, day',
     'ORDER BY year.year, month.month, day.day',
   ])
-    ::map( record => Dt( record.get( 'day' ), record.get( 'month' ), record.get( 'year' ) ) )
+    ::map( record => Day( record.get( 'day' ), record.get( 'month' ), record.get( 'year' ) ) )
     ::toArray()
     ::send( res, 'days' )
     ;
